@@ -1,6 +1,10 @@
 import { Board } from "../core/Board";
 import ImageManager from '../ui/ImageManager'
 import InputManager from "../core/InputManager";
+import MoveValidator from "../core/MoveValidator";
+import { MoveType, PieceTypes, Sides, type SquareCoords, type ValidMove } from "../types/Types";
+import type { Piece } from "../core/Piece";
+import Canvas2DShapeStorage from "./Canvas2DShapeStorage";
 
 export class Renderer {
 
@@ -15,7 +19,7 @@ export class Renderer {
         const { x: hoveredSquareX, y: hoveredSquareY } = InputManager.getCurrentHoveredSquare()
 
         for(const [rowIndex, row] of board.grid.entries()){
-            for(const [squareIndex, _] of row.entries()){               
+            for(const [squareIndex, square] of row.entries()){
 
                 const x = squareIndex * squareSize
                 const y = rowIndex * squareSize
@@ -28,20 +32,93 @@ export class Renderer {
                 if(squareIndex === hoveredSquareX && rowIndex === hoveredSquareY){
                     pen.fillStyle = isBlack ? "#996a47" : "#d7be96";
                 }
-
-                // Active piece square
-                const cell = board.grid[rowIndex][squareIndex]
                 
-                if(cell){
-                   const piece = cell;
+                if(square){
+                   const piece = square;
                    
-                   if(piece.isSelected){
-                        pen.fillStyle = "#994747";
+                   if(piece.isSelected || piece.isDragging){
+                       pen.fillStyle = "#994747";
                    }
                 }
                 
+                // Render the square
                 pen.fillRect(x, y, squareSize, squareSize)
+                
+                // TEMP:
+                pen.textBaseline = 'top';
+                pen.fillStyle = 'blue'
+                pen.fillText(`${rowIndex}-${squareIndex}`, x, y, squareSize)
             }
+        }
+    }
+
+    private static renderAvailableMovesForSelected(board: Board, pen: CanvasRenderingContext2D): void {
+        const squareSize = board.squareSize
+
+        if(!squareSize){
+            console.error('Board is not initialized or square size is not set.')
+            return;
+        }
+        
+        for(const [rowIndex, row] of board.grid.entries()){
+            for(const [squareIndex, square] of row.entries()){
+
+                if(square){
+                   const piece = square;
+                   
+                   if(piece.isSelected || piece.isDragging){
+                        Renderer.renderValidMoves(board, piece, {x: rowIndex, y: squareIndex}, pen)
+                    }
+                }
+
+            }
+        }
+    }
+
+    private static renderValidMoves(board: Board, piece: Piece, origin: SquareCoords, pen: CanvasRenderingContext2D): void{
+        const squareCoords = {x: origin.x, y: origin.y}
+        let validMoves;
+        switch (piece.type) {
+            case PieceTypes.Pawn:
+                validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                break;
+            case PieceTypes.Knight:
+                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                break;
+            case PieceTypes.Bishop:
+                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                break;
+            case PieceTypes.Rook:
+                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                break;
+            case PieceTypes.Queen:
+                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                break;
+            case PieceTypes.King:
+                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                break;
+            default:
+                break;
+        }
+        
+        const squareSize = board.squareSize
+
+        if(!validMoves || !squareSize){
+            return;
+        }
+
+        const margin = squareSize * 0.8;
+        const pointUp = piece.side === Sides.White ? true : false
+        for (const validMove of validMoves){
+            const x = validMove.y * squareSize + margin
+            const y = validMove.x * squareSize + margin
+            const size = squareSize - margin * 2;
+
+            pen.globalAlpha = 0.3
+            validMove.moveType === MoveType.Move ?
+            Canvas2DShapeStorage.drawArrow(pen, x, y, size, 'green', pointUp) : 
+            Canvas2DShapeStorage.drawSword(pen, x, y, size, 'red', pointUp) 
+            pen.globalAlpha = 1
         }
     }
 
@@ -77,5 +154,6 @@ export class Renderer {
     public static nextFrame(board: Board, pen: CanvasRenderingContext2D){
         Renderer.renderBoard(board, pen);
         Renderer.renderPieces(board, pen);
+        Renderer.renderAvailableMovesForSelected(board, pen);
     }
 }

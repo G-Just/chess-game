@@ -15,7 +15,7 @@ export class GameController {
                     }
                 }),
             );
-
+            
             if (!cell) {
                 return; // Cell is empty just ignore the click
             }

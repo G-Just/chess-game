@@ -11,3 +11,19 @@ export enum Sides {
   White = "White",
   Black = "Black"
 }
+
+export enum MoveType {
+    Capture = 'Capture',
+    Move = 'Move'
+}
+
+export type SquareCoords = {
+    x: number,
+    y: number
+}
+
+export type ValidMove = {
+    x: number,
+    y: number
+    moveType: MoveType
+}

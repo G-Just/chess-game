@@ -4,6 +4,7 @@ export class Piece {
     private _type: PieceTypes
     private _side: Sides
     private _isSelected: boolean = false
+    private _isDragging: boolean = false
     private _hasMoved: boolean = false
 
     constructor(type: PieceTypes, side: Sides){
@@ -18,6 +19,10 @@ export class Piece {
     
     get side() {
         return this._side
+    }
+
+    get isDragging() {
+        return this._isDragging
     }
 
     get isSelected() {
