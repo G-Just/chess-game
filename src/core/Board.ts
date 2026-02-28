@@ -80,9 +80,9 @@ export class Board {
         this._grid[7][4] = PieceFactory.king(Sides.White);
         this._grid[0][4] = PieceFactory.king(Sides.Black);
 
-        // TEMP:
-        // Testing
+        // TEMP: Testing
         this._grid[4][4] = PieceFactory.pawn(Sides.White);
         this._grid[3][3] = PieceFactory.pawn(Sides.Black);
+        this._grid[5][2] = PieceFactory.pawn(Sides.White);
     }
 }

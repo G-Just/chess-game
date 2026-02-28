@@ -1,7 +1,4 @@
-type MovePattern = {
-    vectors: { x: number; y: number }[];
-    count: number;
-};
+import type { MovePattern } from "./Types"
 
 class PieceMovesStorage {
     // Pawn

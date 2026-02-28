@@ -1,0 +1,24 @@
+General todo list:
+
+Add coordiante displays outside of the board
+
+Create the actual move logic
+Create capture logic (maybe the same as move logic)
+Create piece drag logic + UI
+Create a captured piece display
+
+Create "en passant" logic for pawns
+Create "castling" logic for kings + rooks
+Create promotion logic for pawns to promote when reaching the other side
+Create king rules (seems hard):
+    - King cannot move into danger
+    - Other pieces cannot move to put own king into danger
+    - If check king must be protected by moving or blocking
+
+Create turn based system for both sides
+Include option to switch the board based on who's side is it
+Include check-mate checks and game over
+Create reset board button
+
+....
+

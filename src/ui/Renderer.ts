@@ -75,6 +75,8 @@ export class Renderer {
         }
     }
 
+    // TODO: figure out a way to not check the valid moves for each draw frame, 
+    // and track if the last checked piece changed if not just skip this logic
     private static renderValidMoves(board: Board, piece: Piece, origin: SquareCoords, pen: CanvasRenderingContext2D): void{
         const squareCoords = {x: origin.x, y: origin.y}
         let validMoves;
@@ -83,19 +85,19 @@ export class Renderer {
                 validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
                 break;
             case PieceTypes.Knight:
-                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                validMoves = MoveValidator.getValidKnightMoves(squareCoords, board)
                 break;
             case PieceTypes.Bishop:
-                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                validMoves = MoveValidator.getValidBishopMoves(squareCoords, board)
                 break;
             case PieceTypes.Rook:
-                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                validMoves = MoveValidator.getValidRookMoves(squareCoords, board)
                 break;
             case PieceTypes.Queen:
-                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                validMoves = MoveValidator.getValidQueenMoves(squareCoords, board)
                 break;
             case PieceTypes.King:
-                // validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                validMoves = MoveValidator.getValidKingMoves(squareCoords, board)
                 break;
             default:
                 break;
@@ -107,18 +109,26 @@ export class Renderer {
             return;
         }
 
-        const margin = squareSize * 0.8;
-        const pointUp = piece.side === Sides.White ? true : false
+        // const margin = squareSize * 0.8;
+        // const pointUp = piece.side === Sides.White ? true : false
         for (const validMove of validMoves){
-            const x = validMove.y * squareSize + margin
-            const y = validMove.x * squareSize + margin
-            const size = squareSize - margin * 2;
+            
+            // const x = validMove.y * squareSize + margin
+            // const y = validMove.x * squareSize + margin
+            // const size = squareSize - margin * 2;
+            // pen.globalAlpha = 0.4
+            // validMove.moveType === MoveType.Move ?
+            // Canvas2DShapeStorage.drawArrow(pen, x, y, size, 'green', pointUp) : 
+            // Canvas2DShapeStorage.drawSword(pen, x, y, size, 'red', pointUp)
+            // pen.globalAlpha = 1
+            
+            pen.strokeStyle = validMove.moveType === MoveType.Move ? 'green' : 'red';
+            pen.lineWidth = 5
+            const offeset = 10
+            const x = validMove.y * squareSize + offeset
+            const y = validMove.x * squareSize + offeset
 
-            pen.globalAlpha = 0.3
-            validMove.moveType === MoveType.Move ?
-            Canvas2DShapeStorage.drawArrow(pen, x, y, size, 'green', pointUp) : 
-            Canvas2DShapeStorage.drawSword(pen, x, y, size, 'red', pointUp) 
-            pen.globalAlpha = 1
+            pen.strokeRect(x, y, squareSize - offeset * 2, squareSize - offeset * 2)
         }
     }
 

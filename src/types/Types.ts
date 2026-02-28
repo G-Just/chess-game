@@ -27,3 +27,8 @@ export type ValidMove = {
     y: number
     moveType: MoveType
 }
+
+export type MovePattern = {
+    vectors: { x: number; y: number }[];
+    count: number;
+};
