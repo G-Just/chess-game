@@ -4,7 +4,6 @@ import InputManager from "../core/InputManager";
 import MoveValidator from "../core/MoveValidator";
 import { MoveType, PieceTypes, Sides, type SquareCoords, type ValidMove } from "../types/Types";
 import type { Piece } from "../core/Piece";
-import Canvas2DShapeStorage from "./Canvas2DShapeStorage";
 
 export class Renderer {
 
@@ -78,30 +77,42 @@ export class Renderer {
     // TODO: figure out a way to not check the valid moves for each draw frame, 
     // and track if the last checked piece changed if not just skip this logic
     private static renderValidMoves(board: Board, piece: Piece, origin: SquareCoords, pen: CanvasRenderingContext2D): void{
-        const squareCoords = {x: origin.x, y: origin.y}
+        const squareCoords: SquareCoords = {x: origin.x, y: origin.y}
+
         let validMoves;
-        switch (piece.type) {
-            case PieceTypes.Pawn:
-                validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
-                break;
-            case PieceTypes.Knight:
-                validMoves = MoveValidator.getValidKnightMoves(squareCoords, board)
-                break;
-            case PieceTypes.Bishop:
-                validMoves = MoveValidator.getValidBishopMoves(squareCoords, board)
-                break;
-            case PieceTypes.Rook:
-                validMoves = MoveValidator.getValidRookMoves(squareCoords, board)
-                break;
-            case PieceTypes.Queen:
-                validMoves = MoveValidator.getValidQueenMoves(squareCoords, board)
-                break;
-            case PieceTypes.King:
-                validMoves = MoveValidator.getValidKingMoves(squareCoords, board)
-                break;
-            default:
-                break;
+
+        const currentPieceCoords = MoveValidator.getCurrentlySelectedPieceCoords
+        if(currentPieceCoords &&
+            currentPieceCoords.x === squareCoords.x &&
+            currentPieceCoords.y === squareCoords.y
+        ){
+            // Cache the valid moves to not call the validator logic each frame
+            validMoves = MoveValidator.getCurrentlySelectedPieceValidMoves;
+        } else {
+            switch (piece.type) {
+                case PieceTypes.Pawn:
+                    validMoves = MoveValidator.getValidPawnMoves(squareCoords, board)
+                    break;
+                case PieceTypes.Knight:
+                    validMoves = MoveValidator.getValidKnightMoves(squareCoords, board)
+                    break;
+                case PieceTypes.Bishop:
+                    validMoves = MoveValidator.getValidBishopMoves(squareCoords, board)
+                    break;
+                case PieceTypes.Rook:
+                    validMoves = MoveValidator.getValidRookMoves(squareCoords, board)
+                    break;
+                case PieceTypes.Queen:
+                    validMoves = MoveValidator.getValidQueenMoves(squareCoords, board)
+                    break;
+                case PieceTypes.King:
+                    validMoves = MoveValidator.getValidKingMoves(squareCoords, board)
+                    break;
+                default:
+                    break;
+            }
         }
+
         
         const squareSize = board.squareSize
 

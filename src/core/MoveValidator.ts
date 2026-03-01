@@ -5,6 +5,22 @@ import { Piece } from "./Piece.ts";
 
 class MoveValidator {
 
+    private static _lastSelectedPieceCoords: SquareCoords | null = null;
+    private static _lastSelectedPieceValidMoves: ValidMove[] | null = null;
+
+    static get getCurrentlySelectedPieceCoords() {
+        return MoveValidator._lastSelectedPieceCoords
+    }
+
+    static get getCurrentlySelectedPieceValidMoves() {
+        return MoveValidator._lastSelectedPieceValidMoves
+    }
+
+    public static clearCachedPieceMoveData(){
+        MoveValidator._lastSelectedPieceCoords = null;
+        MoveValidator._lastSelectedPieceValidMoves = null;
+    }
+
     private static getPieceOrNull(squareCoords: SquareCoords, board: Board, pieceType: PieceTypes): Piece | null {
         const piece = board.grid[squareCoords.x][squareCoords.y]
 
@@ -52,6 +68,10 @@ class MoveValidator {
             }
         }
         
+        // Cache the currently available moves
+        MoveValidator._lastSelectedPieceCoords = squareCoords;
+        MoveValidator._lastSelectedPieceValidMoves = validMoveArray;
+
         return validMoveArray
     }
 
@@ -81,6 +101,10 @@ class MoveValidator {
             validMoveArray.push({x, y, moveType})
         }
         
+        // Cache the currently available moves
+        MoveValidator._lastSelectedPieceCoords = squareCoords;
+        MoveValidator._lastSelectedPieceValidMoves = validMoveArray;
+
         return validMoveArray
     }
 
@@ -136,6 +160,10 @@ class MoveValidator {
             validMoveArray.push({x: x, y: squareCoords.y - 1, moveType: MoveType.Capture})
         }
 
+        // Cache the currently available moves
+        MoveValidator._lastSelectedPieceCoords = squareCoords;
+        MoveValidator._lastSelectedPieceValidMoves = validMoveArray;
+        
         return validMoveArray
     }
 

@@ -3,9 +3,9 @@ class InputManager {
     private static _hoveredSquareCoords: {x: number, y: number}
     private static _squareSize: number;
 
-    private static clickListeners: ((pos: {x:number,y:number}) => void)[] = [];
+    private static clickListeners: ((pos: {x:number, y:number}) => void)[] = [];
 
-    public static onClick(callback: (pos: {x:number,y:number}) => void) {
+    public static onClick(callback: (pos: {x:number, y:number}) => void) {
         InputManager.clickListeners.push(callback);
     }
 
