@@ -1,5 +1,9 @@
 General todo list:
 
+Rethink the general approach for the moveValidator, this should not be called inside the stateless static render class. 
+    Maybe move it in the GameController?
+    The controller can then manage further since it holds the general meta data about the game etc.
+
 Add coordiante displays outside of the board
 
 Create the actual move logic
