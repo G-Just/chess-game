@@ -1,56 +1,50 @@
+import type { SquareCoords } from "../types/Types";
+import Board from "./Board";
+
 class InputManager {
+    private static _mousePixelX: number = -1;
+    private static _mousePixelY: number = -1;
 
-    private static _hoveredSquareCoords: {x: number, y: number}
-    private static _squareSize: number;
+    private static clickListeners: ((squareCoords: SquareCoords) => void)[] = [];
 
-    private static clickListeners: ((pos: {x:number, y:number}) => void)[] = [];
-
-    public static onClick(callback: (pos: {x:number, y:number}) => void) {
+    public static onClick(callback: (squareCoords: SquareCoords) => void) {
         InputManager.clickListeners.push(callback);
+    }
+
+    private static pixelsToGridCoords(pixelX: number, pixelY: number): SquareCoords {
+        return {
+            x: Math.floor(pixelX / Board.squareSize),
+            y: Math.floor(pixelY / Board.squareSize)
+        }
+    }
+
+    public static getHoveredSquare(): SquareCoords {
+        return InputManager.pixelsToGridCoords(InputManager._mousePixelX, InputManager._mousePixelY)
     }
 
     static {
         window.addEventListener("DOMContentLoaded", () => {
             const canvas = document.getElementById("chess") as HTMLCanvasElement;
-            
-            if(canvas){
 
-                InputManager._squareSize = canvas.height / 8
-
-                // Return registered callbacks for click event
-                canvas.addEventListener("click", (_) => {
-                    InputManager.clickListeners.forEach(callback => callback(InputManager.getCurrentHoveredSquare()));
-                });
-
-                canvas.addEventListener('mousemove', (event: MouseEvent) => {
-                    InputManager._hoveredSquareCoords = {x: event.offsetX, y: event.offsetY}
-                })
-
-                // When the mouse leaves the canvas just set default no hovered state
-                canvas.addEventListener("mouseleave", () => {
-                    InputManager._hoveredSquareCoords = { x: -1, y: -1 };
-                });
-            } else {
-                console.error('InputManager error. Canvas element not found');
+            if (!canvas) {
+                console.error('InputManager: Canvas element not found');
+                return;
             }
-        })
-    }
 
-    public static getCurrentHoveredSquare(): {x: number, y: number} {
-        if(!InputManager._hoveredSquareCoords){ // Mouse not over the board
-            return {
-                'x': -1,
-                'y': -1
-            }
-        }
+            canvas.addEventListener("click", () => {
+                InputManager.clickListeners.forEach(cb => cb(InputManager.getHoveredSquare()));
+            });
 
-        const x = InputManager._hoveredSquareCoords.x
-        const y = InputManager._hoveredSquareCoords.y
-        
-        return {
-            'x': Math.floor(x / InputManager._squareSize),
-            'y': Math.floor(y / InputManager._squareSize)
-        }
+            canvas.addEventListener("mousemove", (e: MouseEvent) => {
+                InputManager._mousePixelX = e.offsetX  - Board.boardMargin;
+                InputManager._mousePixelY = e.offsetY  - Board.boardMargin;
+            });
+
+            canvas.addEventListener("mouseleave", () => {
+                InputManager._mousePixelX = -1;
+                InputManager._mousePixelY = -1;
+            });
+        });
     }
 }
 

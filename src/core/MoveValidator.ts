@@ -1,28 +1,37 @@
 import { MoveType, PieceTypes, Sides, type MovePattern, type SquareCoords, type ValidMove } from "../types/Types.ts";
-import type { Board } from "./Board.ts";
 import PieceMovesStorage from '../types/PieceMovesStorage.ts'
-import { Piece } from "./Piece.ts";
+import Board from "./Board.ts";
+import { type Piece } from "./Piece.ts";
 
 class MoveValidator {
 
-    private static _lastSelectedPieceCoords: SquareCoords | null = null;
-    private static _lastSelectedPieceValidMoves: ValidMove[] | null = null;
+    public static getValidMoves(squareCoords: SquareCoords): ValidMove[] {
+        const piece = Board.getSquare(squareCoords)
 
-    static get getCurrentlySelectedPieceCoords() {
-        return MoveValidator._lastSelectedPieceCoords
+        if(!piece){
+            return []
+        }
+
+        switch (piece.type) {
+            case PieceTypes.Pawn:
+                return MoveValidator._getValidPawnMoves(squareCoords)
+            case PieceTypes.Knight:
+                return MoveValidator._getValidKnightMoves(squareCoords)
+            case PieceTypes.Bishop:
+                return MoveValidator._getValidBishopMoves(squareCoords)
+            case PieceTypes.Rook:
+                return MoveValidator._getValidRookMoves(squareCoords)
+            case PieceTypes.Queen:
+                return MoveValidator._getValidQueenMoves(squareCoords)
+            case PieceTypes.King:
+                return MoveValidator._getValidKingMoves(squareCoords)
+            default:
+                return []
+        }
     }
 
-    static get getCurrentlySelectedPieceValidMoves() {
-        return MoveValidator._lastSelectedPieceValidMoves
-    }
-
-    public static clearCachedPieceMoveData(){
-        MoveValidator._lastSelectedPieceCoords = null;
-        MoveValidator._lastSelectedPieceValidMoves = null;
-    }
-
-    private static getPieceOrNull(squareCoords: SquareCoords, board: Board, pieceType: PieceTypes): Piece | null {
-        const piece = board.grid[squareCoords.x][squareCoords.y]
+    private static _getPieceOrNull(squareCoords: SquareCoords, pieceType: PieceTypes): Piece | null {
+        const piece = Board.getSquare(squareCoords)
 
         if(!piece || piece.type !== pieceType){
             console.error(`${pieceType} move validation called on non-pawn piece. Coordinates:`, squareCoords)
@@ -32,7 +41,7 @@ class MoveValidator {
         return piece;
     }
 
-    private static isInBounds(x: number, y: number): boolean {        
+    private static _isInBounds(x: number, y: number): boolean {        
         if(x > 7 || x < 0 || y > 7 || y < 0){
             return false;
         }
@@ -40,7 +49,7 @@ class MoveValidator {
         return true;
     }
 
-    private static getSlidingMoves(piceMoveVector: MovePattern, side: Sides, squareCoords: SquareCoords, board: Board): ValidMove[] {
+    private static _getSlidingMoves(piceMoveVector: MovePattern, side: Sides, squareCoords: SquareCoords): ValidMove[] {
 
         const validMoveArray: ValidMove[] = []
 
@@ -49,9 +58,9 @@ class MoveValidator {
                 const x = squareCoords.x + vector.x * step;
                 const y = squareCoords.y + vector.y * step;
 
-                if(!MoveValidator.isInBounds(x, y)) break;
+                if(!MoveValidator._isInBounds(x, y)) break;
 
-                const currentCheckingSquare = board.grid[x][y]
+                const currentCheckingSquare = Board.getSquare({x, y})
                 let moveType = MoveType.Move;
                 
                 if(currentCheckingSquare){
@@ -68,14 +77,10 @@ class MoveValidator {
             }
         }
         
-        // Cache the currently available moves
-        MoveValidator._lastSelectedPieceCoords = squareCoords;
-        MoveValidator._lastSelectedPieceValidMoves = validMoveArray;
-
         return validMoveArray
     }
 
-    private static getSingleStepMoves(piceMoveVector: MovePattern, side: Sides, squareCoords: SquareCoords, board: Board): ValidMove[] {
+    private static _getSingleStepMoves(piceMoveVector: MovePattern, side: Sides, squareCoords: SquareCoords): ValidMove[] {
 
         const validMoveArray: ValidMove[] = []
 
@@ -83,9 +88,9 @@ class MoveValidator {
                 const x = squareCoords.x + vector.x;
                 const y = squareCoords.y + vector.y;
 
-                if(!MoveValidator.isInBounds(x, y)) continue;
+                if(!MoveValidator._isInBounds(x, y)) continue;
 
-                const currentCheckingSquare = board.grid[x][y]
+                const currentCheckingSquare = Board.getSquare({x, y})
                 let moveType = MoveType.Move;
                 
                 if(currentCheckingSquare){
@@ -101,20 +106,16 @@ class MoveValidator {
             validMoveArray.push({x, y, moveType})
         }
         
-        // Cache the currently available moves
-        MoveValidator._lastSelectedPieceCoords = squareCoords;
-        MoveValidator._lastSelectedPieceValidMoves = validMoveArray;
-
         return validMoveArray
     }
 
     // TODO: implement "en passant" logic
-    public static getValidPawnMoves(squareCoords: SquareCoords, board: Board): ValidMove[] | null {
+    private static _getValidPawnMoves(squareCoords: SquareCoords): ValidMove[] {
 
-        const piece = MoveValidator.getPieceOrNull(squareCoords, board, PieceTypes.Pawn)
+        const piece = MoveValidator._getPieceOrNull(squareCoords, PieceTypes.Pawn)
 
         if(!piece){
-            return null;
+            return [];
         }
 
         const validMoveArray: ValidMove[] = []
@@ -132,104 +133,101 @@ class MoveValidator {
 
         if(!piceMoveVector){
             console.error('MoveValidator getValidPawnMoves could not determine the correct PieceMovesStorage vector')
-            return null;
+            return [];
         }
 
         for (const vector of piceMoveVector.vectors)
             for (let i = 0; i < piceMoveVector.count; i++) {
             {
-                const x = squareCoords.x + (vector.x ? vector.x + i : 0) * sideFlag
+                const x = squareCoords.x
                 const y = squareCoords.y + (vector.y ? vector.y + i : 0) * sideFlag
                 const moveType = MoveType.Move;
                 
                 // Check if a piece is blocking and stop adding this vector if yes
-                if(board.grid[x][y]) break;
+                if(Board.getSquare({x, y})) break;
 
                 validMoveArray.push({x, y, moveType})
             }
         }
 
         // Unique capture logic for pawns
-        const x = squareCoords.x + 1 * sideFlag
-        const left = board.grid[x][squareCoords.y + 1]
-        const right = board.grid[x][squareCoords.y - 1]
+        const y = squareCoords.y + 1 * sideFlag
+        const left = Board.getSquare({x: squareCoords.x + 1, y})
+        const right = Board.getSquare({x: squareCoords.x - 1, y})
         if(left && left.side !== piece.side){
-            validMoveArray.push({x: x, y: squareCoords.y + 1, moveType: MoveType.Capture})
+            validMoveArray.push({x: squareCoords.x + 1, y, moveType: MoveType.Capture})
         }
         if(right && right.side !== piece.side){
-            validMoveArray.push({x: x, y: squareCoords.y - 1, moveType: MoveType.Capture})
+            validMoveArray.push({x: squareCoords.x - 1, y, moveType: MoveType.Capture})
         }
 
-        // Cache the currently available moves
-        MoveValidator._lastSelectedPieceCoords = squareCoords;
-        MoveValidator._lastSelectedPieceValidMoves = validMoveArray;
         
         return validMoveArray
     }
 
-    public static getValidKnightMoves(squareCoords: SquareCoords, board: Board): ValidMove[] | null {
-        const piece = MoveValidator.getPieceOrNull(squareCoords, board, PieceTypes.Knight)
+    private static _getValidKnightMoves(squareCoords: SquareCoords): ValidMove[] {
+        const piece = MoveValidator._getPieceOrNull(squareCoords, PieceTypes.Knight)
 
         if(!piece){
-            return null;
+            return [];
         }
 
         const piceMoveVector = PieceMovesStorage.knightVector
         const side = piece.side
 
-       return MoveValidator.getSingleStepMoves(piceMoveVector, side, squareCoords, board)
+       return MoveValidator._getSingleStepMoves(piceMoveVector, side, squareCoords)
     }
 
-    public static getValidBishopMoves(squareCoords: SquareCoords, board: Board): ValidMove[] | null {
-        const piece = MoveValidator.getPieceOrNull(squareCoords, board, PieceTypes.Bishop)
+    private static _getValidBishopMoves(squareCoords: SquareCoords): ValidMove[] {
+        const piece = MoveValidator._getPieceOrNull(squareCoords, PieceTypes.Bishop)
 
         if(!piece){
-            return null;
+            return [];
         }
 
         const piceMoveVector = PieceMovesStorage.bishopVector
         const side = piece.side
 
-       return MoveValidator.getSlidingMoves(piceMoveVector, side, squareCoords, board)
+       return MoveValidator._getSlidingMoves(piceMoveVector, side, squareCoords)
     }
 
-    public static getValidRookMoves(squareCoords: SquareCoords, board: Board): ValidMove[] | null {
-        const piece = MoveValidator.getPieceOrNull(squareCoords, board, PieceTypes.Rook)
+    private static _getValidRookMoves(squareCoords: SquareCoords): ValidMove[] {
+        const piece = MoveValidator._getPieceOrNull(squareCoords, PieceTypes.Rook)
 
         if(!piece){
-            return null;
+            return [];
         }
 
         const piceMoveVector = PieceMovesStorage.rookVector
         const side = piece.side
 
-       return MoveValidator.getSlidingMoves(piceMoveVector, side, squareCoords, board)
+       return MoveValidator._getSlidingMoves(piceMoveVector, side, squareCoords)
     }
 
-    public static getValidQueenMoves(squareCoords: SquareCoords, board: Board): ValidMove[] | null {
-        const piece = MoveValidator.getPieceOrNull(squareCoords, board, PieceTypes.Queen)
+    private static _getValidQueenMoves(squareCoords: SquareCoords): ValidMove[] {
+        const piece = MoveValidator._getPieceOrNull(squareCoords, PieceTypes.Queen)
 
         if(!piece){
-            return null;
+            return [];
         }
 
         const piceMoveVector = PieceMovesStorage.queenVector
         const side = piece.side
 
-       return MoveValidator.getSlidingMoves(piceMoveVector, side, squareCoords, board)
+       return MoveValidator._getSlidingMoves(piceMoveVector, side, squareCoords)
     }
 
-    public static getValidKingMoves(squareCoords: SquareCoords, board: Board): ValidMove[] | null {
-        const piece = MoveValidator.getPieceOrNull(squareCoords, board, PieceTypes.King)
+    private static _getValidKingMoves(squareCoords: SquareCoords): ValidMove[] {
+        const piece = MoveValidator._getPieceOrNull(squareCoords, PieceTypes.King)
 
         if(!piece){
-            return null;
+            return [];
         }
 
         const piceMoveVector = PieceMovesStorage.kingVector
         const side = piece.side
 
-       return MoveValidator.getSingleStepMoves(piceMoveVector, side, squareCoords, board)
+       return MoveValidator._getSingleStepMoves(piceMoveVector, side, squareCoords)
     }
 }
 

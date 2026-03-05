@@ -1,17 +1,21 @@
-import type { SquareCoords } from "../types/Types";
-import type { Board } from "./Board";
+import { type SquareCoords } from "../types/Types";
+import Board from "./Board";
+import type { Piece } from "./Piece";
 
 class MoveManager {
 
-    public static movePiece(board: Board, moveFrom: SquareCoords, moveTo: SquareCoords){
-        console.log('move')
-        board.grid[moveTo.x][moveTo.y] = board.grid[moveFrom.x][moveFrom.y]
+    public static movePiece(moveFrom: SquareCoords, moveTo: SquareCoords) : Piece | null{
+        const piece = Board.getSquare(moveFrom)
+
+        if(piece) piece.hasMoved = true;
+
+        const target = Board.getSquare(moveTo)
         
-        board.grid[moveFrom.x][moveFrom.y] = null;
-    }
-    
-    public static capturePiece(board: Board, moveFrom: SquareCoords, moveTo: SquareCoords){
-        console.log('capture')
+        Board.setPiece(moveTo, piece)
+
+        Board.setPiece(moveFrom, null)
+
+        return target
     }
 }
 

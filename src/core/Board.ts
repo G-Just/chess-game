@@ -1,88 +1,102 @@
-import { Sides } from '../types/Types';
+import { Sides, type SquareCoords } from '../types/Types';
 import { Piece } from './Piece'
 import { PieceFactory } from './PieceFactory';
 
-export class Board {
+class Board {
     
     private _grid: (null | Piece)[][] = [];
-    private _isInitialized: boolean = false;
     private _squareSize!: number;
+    private _boardSize = 8;
+    private _boardMargin: number = 80;
 
-    public initialize(): void {
-        if(this._isInitialized){
-            return;
-        }
-
+    constructor(){
         window.addEventListener("DOMContentLoaded", () => {
             const canvas = document.getElementById("chess") as HTMLCanvasElement;
 
             if(canvas){
-                this._squareSize = canvas.height / 8
+                this._squareSize = (canvas.height - this._boardMargin * 2) / this._boardSize
             }
         })
 
-        this._grid = Array.from({ length: 8 }, () => new Array(8).fill(null));
+        this._grid = Array.from({ length: this._boardSize }, () => new Array(this._boardSize).fill(null));
     }
 
     // Getters
-    get grid(): (null | Piece)[][] {
-        return this._grid
+    get squareSize(): number {
+        return this._squareSize
     }
 
-    get squareSize(): number | null {
-        return this._squareSize
+    get boardMargin(): number {
+        return this._boardMargin
+    }
+
+    get boardSize(): number {
+        return this._boardSize
     }
 
     // Setters
 
     // Methods
-    public setupInitialPositions() {
+    public getSquare(squareCoords: SquareCoords): Piece | null {
+        return this._grid[squareCoords.y][squareCoords.x]
+    }
+
+    public setPiece(squareCoords: SquareCoords, piece: Piece | null): void {
+        this._grid[squareCoords.y][squareCoords.x] = piece
+    }
+
+    forEachSquare(callback: (squareCoords: SquareCoords, piece: Piece | null) => void): void {
+        for (let y = 0; y < this._boardSize; y++) {
+            for (let x = 0; x < this._boardSize; x++) {
+                callback({x, y}, this._grid[y][x]);
+            }
+        }
+    }
+
+    public setInitialPositions() {
         
         // Empty cells
-        for (let row = 2; row <= 5; row++){
-            for (let col = 0; col <= 7; col++){
-                this._grid[row][col] = null;
+        for (let y = 2; y <= 5; y++){
+            for (let x = 0; x <= 7; x++){
+                this.setPiece({x, y}, null) 
             }
         }
 
         // Pawns
-        for (let col = 0; col < 8; col++) {
-            this._grid[1][col] = PieceFactory.pawn(Sides.Black);
-            this._grid[6][col] = PieceFactory.pawn(Sides.White);
+        for (let x = 0; x < 8; x++) {
+            this.setPiece({x, y: 1}, PieceFactory.pawn(Sides.Black));
+            this.setPiece({x, y: 6}, PieceFactory.pawn(Sides.White));
         }
 
         // Knights
-        this._grid[7][1] = PieceFactory.knight(Sides.White);
-        this._grid[7][6] = PieceFactory.knight(Sides.White);
+        this.setPiece({x: 1, y: 7}, PieceFactory.knight(Sides.White));
+        this.setPiece({x: 6, y: 7}, PieceFactory.knight(Sides.White));
 
-        this._grid[0][1] = PieceFactory.knight(Sides.Black);
-        this._grid[0][6] = PieceFactory.knight(Sides.Black);
-
-        // Bishops
-        this._grid[7][2] = PieceFactory.bishop(Sides.White);
-        this._grid[7][5] = PieceFactory.bishop(Sides.White);
-
-        this._grid[0][2] = PieceFactory.bishop(Sides.Black);
-        this._grid[0][5] = PieceFactory.bishop(Sides.Black);
+        this.setPiece({x: 1, y: 0}, PieceFactory.knight(Sides.Black));
+        this.setPiece({x: 6, y: 0}, PieceFactory.knight(Sides.Black));
 
         // Bishops
-        this._grid[7][0] = PieceFactory.rook(Sides.White);
-        this._grid[7][7] = PieceFactory.rook(Sides.White);
+        this.setPiece({x: 2, y: 7}, PieceFactory.bishop(Sides.White));
+        this.setPiece({x: 5, y: 7}, PieceFactory.bishop(Sides.White));
 
-        this._grid[0][0] = PieceFactory.rook(Sides.Black);
-        this._grid[0][7] = PieceFactory.rook(Sides.Black);
+        this.setPiece({x: 2, y: 0}, PieceFactory.bishop(Sides.Black));
+        this.setPiece({x: 5, y: 0}, PieceFactory.bishop(Sides.Black));
+
+        // Bishops
+        this.setPiece({x: 0, y: 7}, PieceFactory.rook(Sides.White));
+        this.setPiece({x: 7, y: 7}, PieceFactory.rook(Sides.White));
+
+        this.setPiece({x: 0, y: 0}, PieceFactory.rook(Sides.Black));
+        this.setPiece({x: 7, y: 0}, PieceFactory.rook(Sides.Black));
 
         // Queens
-        this._grid[7][3] = PieceFactory.queen(Sides.White);
-        this._grid[0][3] = PieceFactory.queen(Sides.Black);
+        this.setPiece({x: 3, y: 7}, PieceFactory.queen(Sides.White));
+        this.setPiece({x: 3, y: 0}, PieceFactory.queen(Sides.Black));
 
         // Kings
-        this._grid[7][4] = PieceFactory.king(Sides.White);
-        this._grid[0][4] = PieceFactory.king(Sides.Black);
-
-        // TEMP: Testing
-        this._grid[4][4] = PieceFactory.pawn(Sides.White);
-        this._grid[3][3] = PieceFactory.pawn(Sides.Black);
-        this._grid[5][2] = PieceFactory.pawn(Sides.White);
+        this.setPiece({x: 4, y: 7}, PieceFactory.king(Sides.White));
+        this.setPiece({x: 4, y: 0}, PieceFactory.king(Sides.Black));
     }
 }
+
+export default new Board();
