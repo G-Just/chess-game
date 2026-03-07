@@ -1,15 +1,15 @@
-import Pawn_White from "../ui/assets/Pawn_White.png";
-import Pawn_Black from "../ui/assets/Pawn_Black.png";
-import Rook_White from "../ui/assets/Rook_White.png";
-import Rook_Black from "../ui/assets/Rook_Black.png";
-import Knight_White from "../ui/assets/Knight_White.png";
-import Knight_Black from "../ui/assets/Knight_Black.png";
-import Bishop_White from "../ui/assets/Bishop_White.png";
-import Bishop_Black from "../ui/assets/Bishop_Black.png";
-import Queen_White from "../ui/assets/Queen_White.png";
-import Queen_Black from "../ui/assets/Queen_Black.png";
-import King_White from "../ui/assets/King_White.png";
-import King_Black from "../ui/assets/King_Black.png";
+import Pawn_White from "/assets/Pawn_White.png";
+import Pawn_Black from "/assets/Pawn_Black.png";
+import Rook_White from "/assets/Rook_White.png";
+import Rook_Black from "/assets/Rook_Black.png";
+import Knight_White from "/assets/Knight_White.png";
+import Knight_Black from "/assets/Knight_Black.png";
+import Bishop_White from "/assets/Bishop_White.png";
+import Bishop_Black from "/assets/Bishop_Black.png";
+import Queen_White from "/assets/Queen_White.png";
+import Queen_Black from "/assets/Queen_Black.png";
+import King_White from "/assets/King_White.png";
+import King_Black from "/assets/King_Black.png";
 
 /**
  * Manages loading and caching of all game images.
