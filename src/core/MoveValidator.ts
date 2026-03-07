@@ -49,12 +49,12 @@ class MoveValidator {
         return true;
     }
 
-    private static _getSlidingMoves(piceMoveVector: MovePattern, side: Sides, squareCoords: SquareCoords): ValidMove[] {
+    private static _getSlidingMoves(pieceMoveVector: MovePattern, side: Sides, squareCoords: SquareCoords): ValidMove[] {
 
         const validMoveArray: ValidMove[] = []
 
-        for (const vector of piceMoveVector.vectors) {
-            for (let step = 1; step <= piceMoveVector.count; step++) {
+        for (const vector of pieceMoveVector.vectors) {
+            for (let step = 1; step <= pieceMoveVector.count; step++) {
                 const x = squareCoords.x + vector.x * step;
                 const y = squareCoords.y + vector.y * step;
 
@@ -80,11 +80,11 @@ class MoveValidator {
         return validMoveArray
     }
 
-    private static _getSingleStepMoves(piceMoveVector: MovePattern, side: Sides, squareCoords: SquareCoords): ValidMove[] {
+    private static _getSingleStepMoves(pieceMoveVector: MovePattern, side: Sides, squareCoords: SquareCoords): ValidMove[] {
 
         const validMoveArray: ValidMove[] = []
 
-        for (const vector of piceMoveVector.vectors) {
+        for (const vector of pieceMoveVector.vectors) {
                 const x = squareCoords.x + vector.x;
                 const y = squareCoords.y + vector.y;
 
@@ -109,7 +109,7 @@ class MoveValidator {
         return validMoveArray
     }
 
-    // TODO: implement "en passant" logic
+    // TODO: implement "en-passant" logic (en-passant rules -> https://www.chess.com/terms/en-passant)
     private static _getValidPawnMoves(squareCoords: SquareCoords): ValidMove[] {
 
         const piece = MoveValidator._getPieceOrNull(squareCoords, PieceTypes.Pawn)
@@ -121,23 +121,23 @@ class MoveValidator {
         const validMoveArray: ValidMove[] = []
 
         const sideFlag = piece.side === Sides.White ? -1 : 1
-        let piceMoveVector = null;
+        let pieceMoveVector = null;
 
         if(piece.hasMoved){
-            piceMoveVector = PieceMovesStorage.pawnMovedVector
+            pieceMoveVector = PieceMovesStorage.pawnMovedVector
         }
 
         if(!piece.hasMoved){
-            piceMoveVector = PieceMovesStorage.pawnNotMovedVector
+            pieceMoveVector = PieceMovesStorage.pawnNotMovedVector
         }
 
-        if(!piceMoveVector){
+        if(!pieceMoveVector){
             console.error('MoveValidator getValidPawnMoves could not determine the correct PieceMovesStorage vector')
             return [];
         }
 
-        for (const vector of piceMoveVector.vectors)
-            for (let i = 0; i < piceMoveVector.count; i++) {
+        for (const vector of pieceMoveVector.vectors)
+            for (let i = 0; i < pieceMoveVector.count; i++) {
             {
                 const x = squareCoords.x
                 const y = squareCoords.y + (vector.y ? vector.y + i : 0) * sideFlag
@@ -172,10 +172,10 @@ class MoveValidator {
             return [];
         }
 
-        const piceMoveVector = PieceMovesStorage.knightVector
+        const pieceMoveVector = PieceMovesStorage.knightVector
         const side = piece.side
 
-       return MoveValidator._getSingleStepMoves(piceMoveVector, side, squareCoords)
+       return MoveValidator._getSingleStepMoves(pieceMoveVector, side, squareCoords)
     }
 
     private static _getValidBishopMoves(squareCoords: SquareCoords): ValidMove[] {
@@ -185,10 +185,10 @@ class MoveValidator {
             return [];
         }
 
-        const piceMoveVector = PieceMovesStorage.bishopVector
+        const pieceMoveVector = PieceMovesStorage.bishopVector
         const side = piece.side
 
-       return MoveValidator._getSlidingMoves(piceMoveVector, side, squareCoords)
+       return MoveValidator._getSlidingMoves(pieceMoveVector, side, squareCoords)
     }
 
     private static _getValidRookMoves(squareCoords: SquareCoords): ValidMove[] {
@@ -198,10 +198,10 @@ class MoveValidator {
             return [];
         }
 
-        const piceMoveVector = PieceMovesStorage.rookVector
+        const pieceMoveVector = PieceMovesStorage.rookVector
         const side = piece.side
 
-       return MoveValidator._getSlidingMoves(piceMoveVector, side, squareCoords)
+       return MoveValidator._getSlidingMoves(pieceMoveVector, side, squareCoords)
     }
 
     private static _getValidQueenMoves(squareCoords: SquareCoords): ValidMove[] {
@@ -211,10 +211,10 @@ class MoveValidator {
             return [];
         }
 
-        const piceMoveVector = PieceMovesStorage.queenVector
+        const pieceMoveVector = PieceMovesStorage.queenVector
         const side = piece.side
 
-       return MoveValidator._getSlidingMoves(piceMoveVector, side, squareCoords)
+       return MoveValidator._getSlidingMoves(pieceMoveVector, side, squareCoords)
     }
 
     private static _getValidKingMoves(squareCoords: SquareCoords): ValidMove[] {
@@ -224,10 +224,10 @@ class MoveValidator {
             return [];
         }
 
-        const piceMoveVector = PieceMovesStorage.kingVector
+        const pieceMoveVector = PieceMovesStorage.kingVector
         const side = piece.side
 
-       return MoveValidator._getSingleStepMoves(piceMoveVector, side, squareCoords)
+       return MoveValidator._getSingleStepMoves(pieceMoveVector, side, squareCoords)
     }
 }
 

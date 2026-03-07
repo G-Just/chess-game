@@ -72,6 +72,10 @@ export class Piece {
         this._isSelected = flag
     }
 
+    set isDragging(flag: boolean) {
+        this._isDragging = flag
+    }
+
     // #endregion
 
     // #region Methods

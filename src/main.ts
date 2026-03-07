@@ -1,5 +1,4 @@
 import Board from "./core/Board";
-import GameController from "./core/GameController";
 import { Renderer } from "./ui/Renderer";
 
 const canvas = document.getElementById("chess") as HTMLCanvasElement;

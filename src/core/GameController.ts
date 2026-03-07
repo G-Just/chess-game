@@ -12,15 +12,22 @@ class GameController {
 
     private _activePieceValidMoves: ValidMove[] = []; 
     private _selectedSquare: SquareCoords | null = null;
+    private _currentDraggingPiece: Piece | null = null;
 
     private _whiteCapturedPieces: Piece[] = []
     private _blackCapturedPieces: Piece[] = []
 
-    private _isProcessingMove: boolean = false
-
     constructor(){
-        InputManager.onClick((squareCoords: SquareCoords) => {
-            this._handleClick(squareCoords);
+        InputManager.onMouseDown((squareCoords: SquareCoords) => {
+            this._handleDrag(squareCoords);
+        });
+
+        InputManager.onMouseUp((squareCoords: SquareCoords) => {
+            if (!this._currentDraggingPiece) {
+                this._handleClick(squareCoords);
+            } else {
+                this._handleReleaseDragging(squareCoords);
+            }
         });
     }
 
@@ -42,6 +49,10 @@ class GameController {
         return this._blackCapturedPieces;
     }
 
+    get currentDraggingPiece(): Piece | null {
+        return this._currentDraggingPiece;
+    }
+
     // #endregion
 
     // #region Setters
@@ -51,21 +62,31 @@ class GameController {
     // #region Methods
 
     private _handleClick(squareCoords: SquareCoords): void {
-        if (this._isProcessingMove) return;
-
         if (this._selectedSquare && this._tryExecuteMove(squareCoords)) return;
         
         this._clearSelection();
         this._trySelectPiece(squareCoords);
     }
+    
+    private _handleDrag(squareCoords: SquareCoords): void {
+        const piece = this._trySelectPiece(squareCoords);
+        
+        if (!piece) return;
+        
+        this._currentDraggingPiece = piece;
+        piece.isDragging = true;
+    }
+
+    private _handleReleaseDragging(squareCoords: SquareCoords): void {
+        if (!this._tryExecuteMove(squareCoords)) {
+            this._currentDraggingPiece!.isDragging = false;
+            this._currentDraggingPiece = null;
+        }
+    }
 
     private _tryExecuteMove(squareCoords: SquareCoords): boolean {
         const validMove = this._activePieceValidMoves.find(m => coordsEqual(m, squareCoords));
         if (!validMove) return false;
-
-        // Adding some debouncing logic to avoid instantly selecting after moving/capturing
-        this._isProcessingMove = true;
-        setTimeout(() => this._isProcessingMove = false, 100);
 
         const capturedPiece = MoveManager.movePiece(this._selectedSquare!, validMove);
         if (capturedPiece) this._storeCapturedPiece(capturedPiece);
@@ -74,20 +95,27 @@ class GameController {
         return true;
     }
 
-    private _trySelectPiece(squareCoords: SquareCoords): void {
+    private _trySelectPiece(squareCoords: SquareCoords): Piece | null {
         const piece = Board.getSquare(squareCoords);
-        if (!piece || piece.side !== this._currentSideTurn) return;
+        if (!piece || piece.side !== this._currentSideTurn) return null;
 
         piece.isSelected = true;
         this._selectedSquare = squareCoords;
         this._activePieceValidMoves = MoveValidator.getValidMoves(squareCoords);
+        return piece
     }
 
     private _clearSelection(): void {
+        
         Board.forEachSquare((_, piece) => {
-            if (piece?.isSelected) piece.isSelected = false;
+            if(piece){
+                piece.isSelected = false;
+                piece.isDragging = false;
+            }
         });
+
         this._activePieceValidMoves = [];
+        this._currentDraggingPiece = null;
         this._selectedSquare = null;
     }
 
@@ -95,9 +123,6 @@ class GameController {
         piece.side === Sides.White
             ? this._blackCapturedPieces.push(piece)
             : this._whiteCapturedPieces.push(piece);
-
-        console.log(this._blackCapturedPieces)
-        console.log(this._whiteCapturedPieces)
     }
 
     private _startNextTurn(): void{

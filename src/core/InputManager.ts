@@ -5,10 +5,15 @@ class InputManager {
     private static _mousePixelX: number = -1;
     private static _mousePixelY: number = -1;
 
-    private static clickListeners: ((squareCoords: SquareCoords) => void)[] = [];
+    private static mouseDownListeners: ((squareCoords: SquareCoords) => void)[] = [];
+    private static mouseUpListeners: ((squareCoords: SquareCoords) => void)[] = [];
 
-    public static onClick(callback: (squareCoords: SquareCoords) => void) {
-        InputManager.clickListeners.push(callback);
+    public static onMouseDown(callback: (squareCoords: SquareCoords) => void) {
+        InputManager.mouseDownListeners.push(callback);
+    }
+
+    public static onMouseUp(callback: (squareCoords: SquareCoords) => void) {
+        InputManager.mouseUpListeners.push(callback);
     }
 
     private static pixelsToGridCoords(pixelX: number, pixelY: number): SquareCoords {
@@ -22,6 +27,10 @@ class InputManager {
         return InputManager.pixelsToGridCoords(InputManager._mousePixelX, InputManager._mousePixelY)
     }
 
+    public static getMousePosition(): SquareCoords {
+        return {x: InputManager._mousePixelX, y: InputManager._mousePixelY}
+    }
+
     static {
         window.addEventListener("DOMContentLoaded", () => {
             const canvas = document.getElementById("chess") as HTMLCanvasElement;
@@ -31,8 +40,12 @@ class InputManager {
                 return;
             }
 
-            canvas.addEventListener("click", () => {
-                InputManager.clickListeners.forEach(cb => cb(InputManager.getHoveredSquare()));
+            canvas.addEventListener("mousedown", () => {
+                InputManager.mouseDownListeners.forEach(cb => cb(InputManager.getHoveredSquare()));
+            });
+
+            canvas.addEventListener("mouseup", () => {
+                InputManager.mouseUpListeners.forEach(cb => cb(InputManager.getHoveredSquare()));
             });
 
             canvas.addEventListener("mousemove", (e: MouseEvent) => {

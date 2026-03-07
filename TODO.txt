@@ -10,12 +10,11 @@ Create capture logic (maybe the same as move logic)
 Create turn based system for both sides
 Create a captured piece display
 Create reset board button
+Create piece drag logic + UI
 
 __________________________________________________________
 
 General todo list:
-
-Create piece drag logic + UI
 
 Create "en passant" logic for pawns
 Create "castling" logic for kings + rooks

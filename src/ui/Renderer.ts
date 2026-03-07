@@ -1,7 +1,7 @@
 import Board from "../core/Board";
 import ImageManager from '../ui/ImageManager'
 import InputManager from "../core/InputManager";
-import { MoveType, PieceTypes, Sides, type SquareCoords, type ValidMove } from "../types/Types";
+import { MoveType, type SquareCoords, type ValidMove } from "../types/Types";
 import type { Piece } from "../core/Piece";
 import GameController from "../core/GameController";
 
@@ -78,8 +78,8 @@ export class Renderer {
         }
 
         Board.forEachSquare((squareCoords: SquareCoords, piece: Piece | null) => {
-
-            if(piece){
+            
+            if(piece && !piece.isDragging){
                 const key = `${piece.type}_${piece.side}`;
                 const image = ImageManager.get(key);
 
@@ -89,6 +89,25 @@ export class Renderer {
                 pen.drawImage(image, x, y, squareSize, squareSize);
             }
         });
+    }
+
+    private static _renderDraggingPiece(pen: CanvasRenderingContext2D): void {
+        const draggingPiece = GameController.currentDraggingPiece
+
+        if(!draggingPiece) return;
+
+        const squareSize = Board.squareSize
+
+        if(!squareSize){
+            console.error('Board is not initialized or square size is not set.')
+            return;
+        }
+
+        const  {x, y} = InputManager.getMousePosition()
+        const key = `${draggingPiece.type}_${draggingPiece.side}`;
+        const image = ImageManager.get(key);
+
+        pen.drawImage(image, x - squareSize / 2, y - squareSize / 2, squareSize, squareSize);
     }
 
     private static _drawBoardCoordinates(pen: CanvasRenderingContext2D){
@@ -119,22 +138,39 @@ export class Renderer {
     }
 
     private static _drawCapturedPieces(pen: CanvasRenderingContext2D): void {
+        pen.save();
+    
         const whiteCaptured = GameController.whiteCapturedPieces.sort((a, b) => b.scoreValue - a.scoreValue);
         const blackCaptured = GameController.blackCapturedPieces.sort((a, b) => b.scoreValue - a.scoreValue);
 
         const pieceSize = Board.squareSize / 2;
-        const boardSize = Board.boardSize * Board.squareSize
+        const boardSize = Board.boardSize * Board.squareSize;
 
+        const blackScore = whiteCaptured.reduce((acc, cur) => acc += cur.scoreValue, 0);
+
+        const y = (Board.boardMargin * 2 + boardSize) - pieceSize;
+
+        pen.fillStyle = 'black'
+        pen.imageSmoothingEnabled = true;
+        pen.textAlign = 'center';
+        pen.textBaseline = 'middle';
+        pen.font = "15px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+        pen.fillText(`(${blackScore})`, pieceSize / 2, y + pieceSize / 2);
         whiteCaptured.forEach((piece, index) => {
             const image = ImageManager.get(`${piece.type}_${piece.side}`);
-            const y = (Board.boardMargin * 2 + boardSize) - pieceSize;
-            pen.drawImage(image, index * pieceSize, y, pieceSize, pieceSize);
+            pen.drawImage(image, pieceSize + index * pieceSize, y, pieceSize, pieceSize);
         });
 
+        const whiteScore = blackCaptured.reduce((acc, cur) => acc += cur.scoreValue, 0);
+
+        pen.fillText(`(${whiteScore})`, pieceSize / 2, pieceSize / 2);
         blackCaptured.forEach((piece, index) => {
             const image = ImageManager.get(`${piece.type}_${piece.side}`);
-            pen.drawImage(image, index * pieceSize, 0, pieceSize, pieceSize);
+            pen.drawImage(image, pieceSize + index * pieceSize, 0, pieceSize, pieceSize);
         });
+
+        pen.restore();
     }
 
     public static nextFrame(pen: CanvasRenderingContext2D){
@@ -149,6 +185,7 @@ export class Renderer {
 
         Renderer._renderBoard(pen);
         Renderer._renderPieces(pen);
+        Renderer._renderDraggingPiece(pen);
         Renderer._drawBoardCoordinates(pen);
 
         const validMoves = GameController.activePieceValidMoves
