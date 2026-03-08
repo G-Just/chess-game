@@ -17,6 +17,10 @@ class MoveManager {
 
         return target
     }
+
+    // TODO: implement the castling logic
+    // public static castle(moveFrom: SquareCoords, moveTo: SquareCoords) : Piece | null{
+    // }
 }
 
 export default MoveManager

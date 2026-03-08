@@ -1,7 +1,7 @@
 import { MoveType, PieceTypes, Sides, type MovePattern, type SquareCoords, type ValidMove } from "../types/Types.ts";
 import PieceMovesStorage from '../types/PieceMovesStorage.ts'
 import Board from "./Board.ts";
-import { type Piece } from "./Piece.ts";
+import { Piece } from "./Piece.ts";
 
 class MoveValidator {
 
@@ -225,7 +225,22 @@ class MoveValidator {
         }
 
         const pieceMoveVector = PieceMovesStorage.kingVector
+
         const side = piece.side
+
+        if(!piece.hasMoved){
+
+            const castleLongRook = Board.getSquare({x: squareCoords.x - 4, y: squareCoords.y})
+            const castleShortRook = Board.getSquare({x: squareCoords.x + 3, y: squareCoords.y})
+            
+            if(castleLongRook?.type === PieceTypes.Rook && !castleLongRook?.hasMoved && castleLongRook.side === side){
+                pieceMoveVector.vectors = [...pieceMoveVector.vectors, ...PieceMovesStorage.kingLongCastleVector.vectors]
+            }
+            
+            if(castleShortRook?.type === PieceTypes.Rook && !castleShortRook?.hasMoved && castleShortRook.side === side){
+                pieceMoveVector.vectors = [...pieceMoveVector.vectors, ...PieceMovesStorage.kingShortCastleVector.vectors]
+            }
+        }
 
        return MoveValidator._getSingleStepMoves(pieceMoveVector, side, squareCoords)
     }
