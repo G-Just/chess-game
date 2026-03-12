@@ -1,4 +1,4 @@
-import { Sides, type SquareCoords, type ValidMove } from "../types/Types";
+import { CastleSides, PieceTypes, Sides, type SquareCoords, type ValidMove } from "../types/Types";
 import { coordsEqual } from "../utils/Helpers";
 import Board from "./Board";
 import InputManager from "./InputManager";
@@ -88,6 +88,21 @@ class GameController {
         const validMove = this._activePieceValidMoves.find(m => coordsEqual(m, squareCoords));
         if (!validMove) return false;
 
+        // Check if the move is castle
+        if(this._selectedSquare){
+            const piece = Board.getSquare(this._selectedSquare)
+
+            if(piece?.type === PieceTypes.King && Math.abs(this._selectedSquare.x - squareCoords.x) === 2){
+                const castleSide = this._selectedSquare.x - squareCoords.x > 0 ? CastleSides.Long : CastleSides.Short
+
+                MoveManager.castle(this.currentSideTurn, castleSide,)
+
+                this._startNextTurn();
+                return true;
+            }
+        }
+
+        // Default move logic
         const capturedPiece = MoveManager.movePiece(this._selectedSquare!, validMove);
         if (capturedPiece) this._storeCapturedPiece(capturedPiece);
 

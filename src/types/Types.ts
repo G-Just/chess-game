@@ -12,6 +12,11 @@ export enum Sides {
   Black = "Black"
 }
 
+export enum CastleSides {
+    Short = "Short",
+    Long = "Long"
+}
+
 export enum MoveType {
     Capture = 'Capture',
     Move = 'Move'

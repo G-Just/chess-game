@@ -233,6 +233,7 @@ class MoveValidator {
             const castleLongRook = Board.getSquare({x: squareCoords.x - 4, y: squareCoords.y})
             const castleShortRook = Board.getSquare({x: squareCoords.x + 3, y: squareCoords.y})
             
+            // TODO: currently its valid to castle over other pieces figure this out
             if(castleLongRook?.type === PieceTypes.Rook && !castleLongRook?.hasMoved && castleLongRook.side === side){
                 pieceMoveVector.vectors = [...pieceMoveVector.vectors, ...PieceMovesStorage.kingLongCastleVector.vectors]
             }

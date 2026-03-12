@@ -68,19 +68,19 @@ class Board {
             this.setPiece({x, y: 6}, PieceFactory.pawn(Sides.White));
         }
 
-        // // Knights
-        // this.setPiece({x: 1, y: 7}, PieceFactory.knight(Sides.White));
-        // this.setPiece({x: 6, y: 7}, PieceFactory.knight(Sides.White));
+        // Knights
+        this.setPiece({x: 1, y: 7}, PieceFactory.knight(Sides.White));
+        this.setPiece({x: 6, y: 7}, PieceFactory.knight(Sides.White));
 
-        // this.setPiece({x: 1, y: 0}, PieceFactory.knight(Sides.Black));
-        // this.setPiece({x: 6, y: 0}, PieceFactory.knight(Sides.Black));
+        this.setPiece({x: 1, y: 0}, PieceFactory.knight(Sides.Black));
+        this.setPiece({x: 6, y: 0}, PieceFactory.knight(Sides.Black));
 
-        // // Bishops
-        // this.setPiece({x: 2, y: 7}, PieceFactory.bishop(Sides.White));
-        // this.setPiece({x: 5, y: 7}, PieceFactory.bishop(Sides.White));
+        // Bishops
+        this.setPiece({x: 2, y: 7}, PieceFactory.bishop(Sides.White));
+        this.setPiece({x: 5, y: 7}, PieceFactory.bishop(Sides.White));
 
-        // this.setPiece({x: 2, y: 0}, PieceFactory.bishop(Sides.Black));
-        // this.setPiece({x: 5, y: 0}, PieceFactory.bishop(Sides.Black));
+        this.setPiece({x: 2, y: 0}, PieceFactory.bishop(Sides.Black));
+        this.setPiece({x: 5, y: 0}, PieceFactory.bishop(Sides.Black));
 
         // Rooks
         this.setPiece({x: 0, y: 7}, PieceFactory.rook(Sides.White));
@@ -89,9 +89,9 @@ class Board {
         this.setPiece({x: 0, y: 0}, PieceFactory.rook(Sides.Black));
         this.setPiece({x: 7, y: 0}, PieceFactory.rook(Sides.Black));
 
-        // // Queens
-        // this.setPiece({x: 3, y: 7}, PieceFactory.queen(Sides.White));
-        // this.setPiece({x: 3, y: 0}, PieceFactory.queen(Sides.Black));
+        // Queens
+        this.setPiece({x: 3, y: 7}, PieceFactory.queen(Sides.White));
+        this.setPiece({x: 3, y: 0}, PieceFactory.queen(Sides.Black));
 
         // Kings
         this.setPiece({x: 4, y: 7}, PieceFactory.king(Sides.White));
